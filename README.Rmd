@@ -7,6 +7,10 @@ date: "9/28/2017"
 title: 'Did National Anthem Protests Cause Your Area Sports Team to Lose?: A Statistical
   Analysis'
 ---
+<br>
+# Did National Anthem Protests Cause Your Area Sports Team to Lose?: A Statistical Analysis 
+
+<br>
 
 Last week, President Trump gave an explicit-laden speech at a rally in Alabama where he suggested NFL players should be fired for taking a knee in protest during the national anthem. The response from NFL players was vast - over 200 players protested this weekend.
 
