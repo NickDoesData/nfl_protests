@@ -1,4 +1,5 @@
-<br> \#\# Did National Anthem Protests Cause Your Area Sports Team to Lose?: A Statistical Analysis
+Did National Anthem Protests Cause Your Area Sports Team to Lose?: A Statistical Analysis
+-----------------------------------------------------------------------------------------
 
 <br>
 
