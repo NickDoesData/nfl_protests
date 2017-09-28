@@ -1,0 +1,252 @@
+---
+title: 'Did National Anthem Protests Cause Your Area Sports Team to Lose?: A Statistical
+  Analysis'
+author: "Nicholas J. Heitzman"
+date: "9/28/2017"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+Last week, President Trump gave an explicit-laden speech at a rally in Alabama where he suggested NFL players should be fired for taking a knee in protest during the national anthem. The response from NFL players was vast - over 200 players protested this weekend.
+
+<br>
+
+Yesterday John R. Lott, president of the right-leaning Crime Prevention Research Center, published an article in Fox News outlining his statistical research of these protests. He concluded there was a “large and statistically significant” relationship between the number of players protesting and the performance of the team during Week 3 of the 2017 NFL season. Mr. Lott was kind enough to publish the data he used and his regression results. In this article, I will examine Mr. Lott’s analysis and provide my own take. This will not be a post about the merits of protesting the national anthem, but one about statistical significance.
+
+<br>
+
+Tl;dr; the relationship is not statistically significant. Mr. Lott’s analysis contains many statistical fallacies.
+
+```{r, lib_chunk,warning=FALSE, message=FALSE}
+library(tidyverse)
+library(readstata13)
+
+```
+
+
+<br>
+The data Mr. Lott provided contained games from Week 3 of the NFL season. It detailed the number of protesters for each team, score of each game, and the betting line of each game as of Thursday and as of Sunday.
+
+
+```{r data_chunk_1}
+df <- readstata13::read.dta13("NFL_Games_Kneeling.dta")
+head(df)
+```
+
+```{r data_chunk2}
+# I found the column names to be difficult to interpret, so I have renamed them.
+colnames(df) <- c('game', 'away_team', 'away_team_score', 'away_team_kneelers', 'home_team', 'home_team_score', 
+                  'home_team_kneelers', 'home_minus_away_score', 'thurs_spread', 'sun_spread', 'away_lockeroom', 
+                  'home_locker_room', 'net_home_kneelers', 'net_home_lockeroom', 'difference_score_minus_spread', 
+                  'difference_number_players_protesting')
+
+
+# the way they recorded spreads is quite peculiar. Usually the home team is labeled with a negative if they're favored.
+# I adjusted to make the data more readable.
+df$sun_spread <- df$sun_spread * -1
+df$thurs_spread <- df$thurs_spread * -1
+
+df
+```
+
+<br>
+
+### The Initial Regression Model
+
+The analysis contains a linear regression model. This model aimed to predict a metric which compared the home team’s performance vs. the spread. If a home team was favored by 7 but won by 10, this metric would result in 3. The model used a variable which compared the difference in the number of protesting from the away team and the home team. If the home team had 20 protesting players and the away team had 10, this metric would be -10.
+
+<br>
+
+My replication of the model in R produced the following results:
+```{r lm_chunk_1}
+model <- lm(df$difference_score_minus_spread ~ df$difference_number_players_protesting)
+summary(model)
+
+```
+
+<br>
+
+This model contains an R-squared value of .38. This number should be interpreted as 38% of the home team’s performance vs. the spread can be explained by the difference in the number of protesting players from each team. The p-value of this metric is .02. The standard rule of thumb for statistical significance is this p-value should be a maximum of .05 (lower p-values mean greater statistical significance). For this reason, Mr. Lott states his result is statistically significant.
+
+<br>
+
+### Visual Analysis
+
+<br>
+
+When conducting a simple regression analysis (an analysis with a single predictor), it is always important to visualize your data.
+
+```{r plot}
+
+ggplot(data = df, aes(x =  difference_number_players_protesting, y = difference_score_minus_spread)) +
+  geom_point(shape=21, color='#1f77b4', fill='white', size =1.5, stroke=1) +
+  ylab("Difference between Home Score \n and Point Spread") +
+  xlab("Difference between Home \nand Away Players Protesting") +
+  ggtitle('NFL Week 3 Protesters vs. Performance', ) +
+  theme_classic() +
+  annotate("text", x = -50, y = 2, size = 2.5,color = '#2ca02c' , label = paste( sprintf('\u2191'),'Home beat \n spread')) +
+  annotate("text", x = -50.2, y = -4, size = 2.5,color = '#d62728', label = paste(sprintf('\u2193'), 'Home lost \n to spread')) +
+  annotate("text", x = -3.7, y = -25, size = 2.5, color = '#d62728', label = paste(sprintf('\u2190'), 'More Away \n Protesters')) +
+  annotate("text", x = 3.2, y = -25, size = 2.5,color = '#2ca02c', label = paste( 'More Home \n Protesters',sprintf('\u2192'))) 
+
+```
+
+<br>
+
+When looking at this data, you can see there is a slight downward trend, but it’s not exactly a linear relationship and a regression line would not fit the data tightly.
+
+<br>
+
+### Statistical Fallacies
+
+<br>
+
+The first statistical fallacy committed in this analysis is the target variable (home team performance relative to the spread). In this analysis, Mr. Lott states.
+
+<br>
+
+“ We used Thursday’s point spread, the day before Trump’s first remarks, to predict how the teams were likely to play in Sunday’s games. The reason for doing it before Friday is that the bettors might have had some idea how the conflicts created by Trump might have affected the team’s performances so that it would already be in the change in the spread by Sunday.”
+
+<br>
+
+On the surface this seems like a perfectly reasonable choice.
+
+
+```{r plot2}
+df$sun_difference <- df$home_minus_away_score + df$sun_spread
+df$spread_difference <- df$sun_spread - df$thurs_spread
+
+ggplot(data=df, aes(x = difference_number_players_protesting, y  = spread_difference)) + 
+  geom_point(shape=21, color='#1f77b4', fill='white', size =1.5, stroke=1) + 
+  xlab('Home Protesters minus Away Protesters') + 
+  ylab('Change in Spread from Thursday to Sunday') +
+  ggtitle('NFL Week 3 Change in Spread') +
+  theme_classic() +
+  annotate("text", x = -50, y = .5, size = 2.5,color = '#2ca02c' , label = paste( sprintf('\u2191'),'Home Team Positive \n Change in Spread')) +
+  annotate("text", x = -50.2, y = -.5, size = 2.5,color = '#d62728', label = paste(sprintf('\u2193'), 'Home Team Negative \n Change in Spread')) +
+  annotate("text", x = -3.7, y = -3, size = 2.5, color = '#d62728', label = paste(sprintf('\u2190'), 'More Away \n Protesters')) +
+  annotate("text", x = 3.2, y = -3, size = 2.5,color = '#2ca02c', label = paste( 'More Home \n Protesters',sprintf('\u2192')))
+
+
+
+```
+
+<br>
+
+This chart demonstrates a few interesting items. The team with the largest difference in protesting players vs. their opponents, the Pittsburgh Steelers, experienced no change in betting line. Many players who protested did not announce their intention to protest prior to the game, so there would have been no way for the odds makers to take these protests into account when setting a line.
+
+<br>
+
+Two other (and in my personal opinion, more relevant) reasons an NFL betting line will change from Thursday to Sunday are injuries and bets placed. NFL teams closely guard information on which players will be available for games, and this information is frequently not made public until Sunday. If a key player is ruled out, the line can shift a point or two on Sunday morning. Additionally, betting lines can shift due to the number of bets placed. If one team is getting a disproportionate amount of bets, the line will shift away from that team.
+
+<br>
+
+The most egregious statistical fallacy in this analysis is sample size. This model is fit on just thirteen data points. This is a dangerously small sample size, and one that leads to unstable models due to its extreme sensitivity to each individual data point. At no point in Mr. Lott’s analysis did he present this shortcoming to his readers, although as a PhD in Econ, he is most certainly aware of it.
+
+<br>
+### Selecting an Appropriate Target Variable
+<br>
+
+NFL buffs reading this might have already recognized that there were in fact more than 13 games played this past week. This statistical model has removed Tampa Bay-Minnesota game was removed due to a lack of Thursday betting data.
+
+<br>
+
+When conducting a regression analysis on a sample size as small as this, the modeler should avoid removing data points at all costs. For this reason, the Sunday betting lines should be the target variable. The chart in the previous section demonstrated there was no relationship between the number of protesting players and a shift in betting line.
+
+<br>
+
+Tampa Bay had two protesting players while Minnesota had none. Tampa Bay lost by 17 points even though they were favored by 3. Intuitively, one might think this would support Mr. Lott’s conclusion that more protesting players lead to a worse performance. When I use the Sunday betting line as a target variable, the model gets considerably weaker:
+
+```{r lm_chunk2}
+model <- lm(df$sun_difference ~ df$difference_number_players_protesting)
+summary(model)
+```
+
+<br>
+
+The R-squared here drops to.30, and the p-value increases to.042, approaching the maximum to be considered statistically significant. This demonstrates how volatile and unstable a regression model on 14 data points is.
+
+<br>
+
+### What about America's Team?
+
+<br>
+
+No statistical analysis involving the national anthem in the NFL would be complete without the Dallas Cowboys. The Dallas-Arizona game was played on Monday night, and I’m guessing Mr. Lott had completed his analysis prior to this game being completed. The entire Dallas Cowboys team took a knee on the field prior to the national anthem in a show of unity. While this was not technically during the anthem, the decision to do this would be equally distracting to a team’s preparation as kneeling during the actual anthem. For this reason, I included all 53 Dallas Cowboys as protesting players. Their opponents, the Arizona Cardinals locked arms, but they did not kneel in protest. When adding this single data point, the model completely falls apart:
+```{r, message=FALSE, warning=FALSE ,data_chunk5}
+# I manually added in data for Cowboys @ Cardinals
+df <- read_csv('nfl_games_kneeling_cowboys.csv')
+```
+
+
+```{r lm_chunk3}
+model <- lm(df$sun_difference ~ df$difference_number_players_protesting)
+summary(model)
+```
+
+<br>
+
+The R-square has dropped to .11, and the p-value of our predicting variable has increased to .22, well above the threshold to be considered statistically significant. A single data point that does not support the original conclusion derailed Mr. Lott’s “statistically significant” relationship.
+
+<br>
+
+### Conclusion
+
+<br>
+
+When articles such as this are published, it is always important to review the methodology used before considering the conclusion. I applaud Mr. Lott for publishing the data and regression results in the name of transparency, and I hope this response can lead to a larger discussion about responsible statistics in journalism.
+
+<br>
+
+Mr. Lott is guilty of an unfortunately common practice in statistics, p-value fishing. He had too small of a sample to even consider a target variable that would reduce the amount of data in the analysis. He did not make readers aware of just how unstable and sensitive his model was to new data points. His statement that the impact of protesting was “large and statistically significant” was meant to deceive. The choices to limit the sample size were not disclosed in the article op-ed, but only in the statistical methodology section.
+
+<br>
+
+Unfortunately, the editors at Fox News has completely let the public down. They did not conduct any basic statistical review or scrutiny and allowed this statistically invalid analysis to be circulated.
+
+```{r plot3}
+
+ggplot(data = df, aes(x =  difference_number_players_protesting, y = sun_difference)) +
+  geom_point(shape=21,  color='#1f77b4', fill='white', size =1.5, stroke=1) +
+  ylab("Difference between Home Score \n and Point Spread") +
+  xlab("Difference between Home \nand Away Players Protesting") +
+  ggtitle('NFL Week 3 Protesters vs. Performance') +
+  theme_classic() +
+  annotate("text", x = -50, y = 2, size = 2.5,color = '#2ca02c' , label = paste( sprintf('\u2191'),'Home beat \n spread')) +
+  annotate("text", x = -50.2, y = -4, size = 2.5,color = '#d62728', label = paste(sprintf('\u2193'), 'Home lost \n to spread')) +
+  annotate("text", x = -4.5, y = -25, size = 2.5, color = '#d62728', label = paste(sprintf('\u2190'), 'More Away \n Protesters')) +
+  annotate("text", x = 5.5, y = -25, size = 2.5,color = '#2ca02c', label = paste( 'More Home \n Protesters',sprintf('\u2192'))) 
+
+
+```
+
+
+```{r plot4}
+ggplot(data = df, aes(x =  difference_number_players_protesting, y = sun_difference)) +
+  geom_point(shape=21,  fill='white', size =1.5, stroke=1) +
+  geom_smooth(method = 'lm') +
+  ylab("Difference between Home Score \n and Point Spread") +
+  xlab("Difference between Home \nand Away Players Protesting") +
+  ggtitle('NFL Week 3 Protesters vs. Performance') +
+  theme_classic() +
+  annotate("text", x = -50, y = 2, size = 2.5,color = '#2ca02c' , label = paste( sprintf('\u2191'),'Home beat \n spread')) +
+  annotate("text", x = -50.2, y = -4, size = 2.5,color = '#d62728', label = paste(sprintf('\u2193'), 'Home lost \n to spread')) +
+  annotate("text", x = -4.5, y = -25, size = 2.5, color = '#d62728', label = paste(sprintf('\u2190'), 'More Away \n Protesters')) +
+  annotate("text", x = 5.5, y = -25, size = 2.5,color = '#2ca02c', label = paste( 'More Home \n Protesters',sprintf('\u2192'))) 
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+

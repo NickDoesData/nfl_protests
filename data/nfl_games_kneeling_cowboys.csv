@@ -1,0 +1,16 @@
+game,away_team,away_team_score,away_team_kneelers,home_team,home_team_score,home_team_kneelers,home_minus_away_score,thurs_spread,sun_spread,away_lockeroom,home_locker_room,net_home_kneelers,net_home_lockeroom,difference_score_minus_spread,difference_number_players_protesting,sun_difference,away_distance_traveled,home_temp
+1,Raiders,10,50,Redskins,27,3,17,3.5,2.5,0,0,-47,0,20.5,-47,19.5,2429,91
+2,Ravens,7,51,Jaguars,44,12,37,4,3,0,0,-39,0,41,-39,40,0,0
+3,Broncos,16,32,Bill,26,9,10,3,1,0,0,-23,0,13,-23,11,1367,90
+4,Steelers,17,0,Bears,23,0,6,7.5,7.5,1,0,0,-1,13.5,52,13.5,409,91
+5,Falcons,30,2,Lions,26,8,-4,3,3,0,0,6,0,-1,6,-1,665,90
+6,Browns,28,20,Colts,31,9,3,0,0,0,0,-11,0,3,-11,3,262,90
+7,Buccaneers,17,2,Vikings,34,0,17,NA,3,0,0,-2,0,NA,-2,20,1327,88
+8,Texans,33,0,Patriots,36,12,3,-13.5,-11,0,0,12,0,-10.5,12,-8,1587,79
+9,Dolphins,6,5,Jets,20,0,14,6,3.5,0,0,-5,0,20,-5,17.5,1092,90
+10,Giants,24,3,Eagles,27,0,3,-6,-3.5,0,0,-3,0,-3,-3,-0.5,80,91
+11,Saints,34,10,Panthers,13,0,-21,-6,-5.5,0,0,-10,0,-27,-10,-26.5,649,84
+12,Seahawks,27,0,Titans,33,0,6,3,2.5,1,1,0,0,9,0,8.5,2005,90
+13,Bengals,24,0,Packers,27,3,3,-9,-7.5,0,0,3,0,-6,3,-4.5,415,90
+14,Chiefs,24,10,Chargers,10,5,-14,3,2.5,0,0,-5,0,-11,-5,-11.5,1354,84
+15,Cowboys,28,53,Cardinals,0,17,-11,NA,-3,0,0,-53,0,NA,-53,14,885,84
